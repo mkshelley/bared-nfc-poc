@@ -6,16 +6,35 @@
   <title>Bared NFC POC</title>
   <meta name="robots" content="noindex" />
   <style>
-    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial; margin:0; padding:20px; background:#fff; color:#111; text-align:center;}
-    .wrap{max-width:720px;margin:0 auto;}
-    .hero{width:100%;height:auto;border-radius:12px;display:block;margin:8px 0;}
-    .placeholder{min-height:200px;background:#eee;border-radius:12px;}
-    h1{font-size:1.3rem;margin:6px 0 12px;}
-    .btn{display:block;padding:14px;border-radius:10px;margin:8px 0;text-decoration:none;border:1px solid #ddd;}
+    :root{--pad:20px;--maxw:720px;--radius:14px;}
+    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial;margin:0;background:#fff;color:#111;}
+    .wrap{max-width:var(--maxw);margin:0 auto;padding:var(--pad);text-align:center;}
+    .hero{width:100%;height:auto;border-radius:var(--radius);display:block;margin:8px 0;}
+    .placeholder{min-height:200px;background:#eee;border-radius:var(--radius);}
+    h1{font-size:1.35rem;margin:10px 0 14px;}
+    .btn{display:block;padding:14px;border-radius:12px;margin:10px 0;text-decoration:none;border:1px solid #ddd}
     .primary{background:#111;color:#fff;border:0;}
     .secondary{background:#f7f7f7;color:#111;}
+    .tertiary{background:#fff;color:#111;}
     .note{color:#666;font-size:.9rem;margin-top:12px;}
     .err{color:#b00020;margin-top:14px;}
+    .actions{display:grid;gap:12px;margin-top:12px}
+    /* Modal / Sheet base */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none}
+    .overlay.show{display:block}
+    .modal,.sheet{position:fixed;left:50%;transform:translateX(-50%);background:#fff;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+    .modal{top:50%;transform:translate(-50%,-50%);width:min(100% - 32px,900px);max-height:85vh;overflow:auto}
+    .sheet{bottom:0;width:min(100% - 16px,900px);max-height:85vh;overflow:auto;border-bottom-left-radius:0;border-bottom-right-radius:0}
+    .modal header,.sheet header{position:sticky;top:0;background:#fff;border-bottom:1px solid #eee;padding:10px 14px;font-weight:600;display:flex;align-items:center;justify-content:space-between}
+    .close{appearance:none;border:0;background:transparent;font-size:1.6rem;line-height:1;cursor:pointer}
+    /* Carousel */
+    .carousel{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:14px}
+    .carousel img{height:60vh;max-height:560px;width:auto;border-radius:12px;scroll-snap-align:center;flex:0 0 auto}
+    .carousel::-webkit-scrollbar{display:none}
+    /* Share row (fallback) */
+    .share-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+    .share-row a{padding:10px 12px;border-radius:10px;border:1px solid #ddd;text-decoration:none;color:#111}
+    @media (max-width:420px){ .carousel img{height:55vh} }
   </style>
 </head>
 <body>
@@ -23,69 +42,192 @@
     <div id="imgwrap" class="placeholder" aria-hidden="true"></div>
     <h1 id="title">Loading…</h1>
 
-    <a id="btn-styling" class="btn primary" href="#" aria-disabled="true">View Styling</a>
-    <a id="btn-reviews" class="btn secondary" href="#" aria-disabled="true">Read Reviews</a>
+    <div class="actions">
+      <button id="btn-share" class="btn tertiary">Share Product</button>
+      <button id="btn-styling" class="btn primary" aria-disabled="true">View Styling</button>
+      <button id="btn-reviews" class="btn secondary" aria-disabled="true">Read Reviews</button>
+    </div>
 
     <div id="note" class="note"></div>
     <div id="err" class="err" hidden></div>
   </div>
 
+  <!-- Overlay + Modal (Styling) -->
+  <div id="ovl-styling" class="overlay" role="dialog" aria-modal="true">
+    <div class="modal" role="document">
+      <header>
+        <span>Styling</span>
+        <button class="close" aria-label="Close" data-close="styling">×</button>
+      </header>
+      <div id="carousel" class="carousel" aria-label="Styling images"></div>
+    </div>
+  </div>
+
+  <!-- Overlay + Sheet (Reviews) -->
+  <div id="ovl-reviews" class="overlay" role="dialog" aria-modal="true">
+    <div class="sheet" role="document">
+      <header>
+        <span>Reviews</span>
+        <button class="close" aria-label="Close" data-close="reviews">×</button>
+      </header>
+      <div id="reviews-content" style="padding:14px;text-align:left"></div>
+    </div>
+  </div>
+
 <script>
 (function(){
-  function qs(name){ const u=new URL(location.href); return u.searchParams.get(name); }
-  const handle = qs('handle');
-  const utmParams = (new URL(location.href)).searchParams.toString();
+  const params = new URL(location.href).searchParams;
+  const handle = params.get('handle');
+  const utmParams = params.toString();
+
   const titleEl = document.getElementById('title');
   const imgWrap = document.getElementById('imgwrap');
-  const btnStyling = document.getElementById('btn-styling');
-  const btnReviews = document.getElementById('btn-reviews');
   const note = document.getElementById('note');
   const err = document.getElementById('err');
+
+  const btnShare = document.getElementById('btn-share');
+  const btnStyling = document.getElementById('btn-styling');
+  const btnReviews = document.getElementById('btn-reviews');
+
+  const ovlStyling = document.getElementById('ovl-styling');
+  const ovlReviews = document.getElementById('ovl-reviews');
+  const carousel = document.getElementById('carousel');
+  const reviewsContent = document.getElementById('reviews-content');
 
   if(!handle){
     titleEl.textContent = 'No product specified';
     err.hidden = false;
     err.textContent = 'This page expects a ?handle=your-product-handle';
-    btnStyling.href = 'https://www.bared.com.au/collections/all';
-    btnReviews.href = 'https://www.bared.com.au/collections/all';
     return;
   }
 
-  // Try local JSON: /nfc/data/<handle>.json
+  // Load product JSON (relative path for GitHub Pages)
   const localJson = `nfc/data/${handle}.json`;
   fetch(localJson)
-    .then(r => {
-      if(!r.ok) throw new Error('local-missing');
-      return r.json();
-    })
+    .then(r => { if(!r.ok) throw new Error('local-missing'); return r.json(); })
     .then(prod => {
       renderProduct(prod);
+      wireShare(prod);
+      wireStyling(prod);
+      wireReviews(prod);
     })
     .catch(() => {
-      // Fallback: minimal rendering based on handle—link to main PDP
+      // Minimal fallback
+      const pdp = `https://baredfootwear.com/au/products/${handle}`;
       titleEl.textContent = handle.replace(/-/g,' ');
       imgWrap.innerHTML = '';
-      const pdp = `https://baredfootwear.com/au/products/${handle}`;
-      const suffix = utmParams ? ((pdp.includes('?') ? '&' : '?') + utmParams) : '';
-      btnStyling.href = pdp + suffix + '#styling';
-      btnReviews.href = pdp + suffix + '#reviews';
-      btnStyling.removeAttribute('aria-disabled'); btnReviews.removeAttribute('aria-disabled');
-      note.textContent = 'Full product data not hosted here. Redirect will go to main site.';
+      btnStyling.onclick = () => location.href = pdp + '#styling';
+      btnReviews.onclick = () => location.href = pdp + '#reviews';
+      btnStyling.removeAttribute('aria-disabled');
+      btnReviews.removeAttribute('aria-disabled');
     });
 
   function renderProduct(p){
     titleEl.textContent = p.title || handle;
     if(p.image){
       imgWrap.innerHTML = `<img class="hero" src="${p.image}" alt="${p.title||''}">`;
-    } else {
-      imgWrap.innerHTML = '';
-    }
-    const pdp = p.url || (`https://www.baredfootwear.com/au/products/${handle}`);
-    const suffix = utmParams ? ((pdp.includes('?') ? '&' : '?') + utmParams) : '';
-    btnStyling.href = pdp + suffix + '#styling';
-    btnReviews.href = pdp + suffix + '#reviews';
-    btnStyling.removeAttribute('aria-disabled'); btnReviews.removeAttribute('aria-disabled');
+    } else { imgWrap.innerHTML = ''; }
+
+    // Keep buttons enabled; they’ll show modals instead of navigation
+    btnStyling.removeAttribute('aria-disabled');
+    btnReviews.removeAttribute('aria-disabled');
+
     if(p.vendor) note.textContent = `By ${p.vendor}`;
+    // Store product on DOM for other handlers
+    document.body.dataset.pdp = p.url || (`https://baredfootwear.com/au/products/${handle}`);
+    document.body.dataset.title = p.title || handle;
+  }
+
+  // 1) Share
+  function wireShare(p){
+    const shareUrl = location.href;
+    const shareData = {
+      title: p.title || 'Bared Footwear',
+      text: p.title ? `${p.title} — from Bared Footwear` : 'Check this out',
+      url: shareUrl
+    };
+    btnShare.onclick = async () => {
+      if (navigator.share) {
+        try { await navigator.share(shareData); } catch(e){}
+      } else {
+        // Fallback quick options
+        const encoded = encodeURIComponent(shareUrl);
+        const subject = encodeURIComponent(p.title || 'Bared Footwear');
+        const body = encodeURIComponent(`${p.title || ''}\n${shareUrl}`);
+        const smsHref = `sms:?&body=${body}`;
+        const emailHref = `mailto:?subject=${subject}&body=${body}`;
+        const waHref = `https://wa.me/?text=${encoded}`;
+        const row = document.createElement('div');
+        row.className = 'share-row';
+        row.innerHTML = `
+          <a href="${smsHref}">SMS</a>
+          <a href="${emailHref}">Email</a>
+          <a href="${waHref}" target="_blank" rel="noopener">WhatsApp</a>
+          <a href="#" id="copylink">Copy link</a>
+        `;
+        btnShare.insertAdjacentElement('afterend', row);
+        const copy = row.querySelector('#copylink');
+        copy.onclick = async (e) => {
+          e.preventDefault();
+          try { await navigator.clipboard.writeText(shareUrl); copy.textContent = 'Copied!'; }
+          catch { prompt('Copy this link:', shareUrl); }
+        }
+      }
+    }
+  }
+
+  // 2) Styling carousel (modal)
+  function wireStyling(p){
+    let imgs = Array.isArray(p.styling) ? p.styling : [];
+    if (!imgs.length && p.image) imgs = [p.image]; // at least show the main image
+    btnStyling.onclick = (e) => {
+      e.preventDefault();
+      carousel.innerHTML = imgs.map(src => `<img src="${src}" alt="Styling image">`).join('');
+      ovlStyling.classList.add('show');
+    };
+    ovlStyling.addEventListener('click', (e)=>{
+      if (e.target === ovlStyling || e.target.dataset.close === 'styling') ovlStyling.classList.remove('show');
+    });
+  }
+
+  // 3) Reviews sheet (loads static HTML, falls back to PDP)
+  function wireReviews(p){
+    const path = p.reviews && p.reviews.htmlPath;
+    btnReviews.onclick = async (e) => {
+      e.preventDefault();
+      reviewsContent.innerHTML = '<p style="margin:14px;color:#666">Loading reviews…</p>';
+      ovlReviews.classList.add('show');
+      if (path){
+        try{
+          const r = await fetch(path);
+          if(!r.ok) throw new Error('not ok');
+          const html = await r.text();
+          reviewsContent.innerHTML = html + renderReviewsFooter();
+        } catch{
+          reviewsContent.innerHTML = renderReviewsFallback(p.url || (`https://baredfootwear.com/au/products/${handle}`));
+        }
+      } else {
+        reviewsContent.innerHTML = renderReviewsFallback(p.url || (`https://baredfootwear.com/au/products/${handle}`));
+      }
+    };
+    ovlReviews.addEventListener('click', (e)=>{
+      if (e.target === ovlReviews || e.target.dataset.close === 'reviews') ovlReviews.classList.remove('show');
+    });
+  }
+
+  function renderReviewsFooter(){
+    const pdp = document.body.dataset.pdp;
+    const suffix = utmParams ? ((pdp.includes('?') ? '&' : '?') + utmParams) : '';
+    return `<div style="margin-top:14px">
+      <a href="${pdp + suffix}#reviews" target="_blank" rel="noopener" class="btn tertiary" style="display:inline-block">View all reviews on product page</a>
+    </div>`;
+  }
+  function renderReviewsFallback(pdp){
+    const suffix = utmParams ? ((pdp.includes('?') ? '&' : '?') + utmParams) : '';
+    return `<div style="padding:14px">
+      <p style="margin:0 0 10px">We couldn’t load inline reviews here.</p>
+      <a href="${pdp + suffix}#reviews" class="btn secondary" style="display:inline-block">Open reviews on product page</a>
+    </div>`;
   }
 })();
 </script>
