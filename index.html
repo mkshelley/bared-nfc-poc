@@ -52,7 +52,7 @@
   }
 
   // Try local JSON: /nfc/data/<handle>.json
-  const localJson = `/nfc/data/${handle}.json`;
+  const localJson = `nfc/data/${handle}.json`;
   fetch(localJson)
     .then(r => {
       if(!r.ok) throw new Error('local-missing');
