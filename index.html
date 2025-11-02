@@ -5,98 +5,89 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Bared NFC POC</title>
   <meta name="robots" content="noindex" />
-
-  <!-- Brand Font -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
-
   <style>
-    :root{
-      --pad:20px; --maxw:720px; --radius:0;          /* 0 = square corners */
-      --bared-black:#111; --btn-radius:10px;
-    }
+    :root{ --pad:20px; --maxw:720px; --radius:0; --bared-black:#111; --btn-radius:10px; }
     body{font-family:'Montserrat',system-ui,-apple-system,"Segoe UI",Roboto,Arial;margin:0;background:#fff;color:#111;}
-    /* Header / Logo */
     .site-header{text-align:center;padding:24px 0 8px;}
     .logo{height:32px;width:auto;max-width:180px;opacity:0;animation:fadeIn .6s ease forwards;}
     @keyframes fadeIn{to{opacity:1;}}
-    /* Layout */
     .wrap{max-width:var(--maxw);margin:0 auto;padding:var(--pad);text-align:center;}
     .hero{width:100%;height:auto;border-radius:var(--radius);display:block;margin:8px 0;}
     .placeholder{min-height:200px;background:#eee;border-radius:var(--radius);}
-    h1{font-size:1.4rem;margin:10px 0 14px;font-weight:600;}
-    /* Buttons – all black */
-    .btn{
-      display:block;width:100%;padding:16px 18px;margin:10px 0;
-      border-radius:var(--btn-radius);
-      text-decoration:none;text-align:center;background:var(--bared-black);color:#fff;border:0;
-      letter-spacing:.02em;font-weight:600;
-      transition:transform .06s ease,opacity .15s ease,box-shadow .15s ease;
-      box-shadow:0 1px 0 rgba(0,0,0,.08);
-    }
-    .btn:hover{opacity:.9;} .btn:active{transform:translateY(1px);}
-    .btn:focus-visible{outline:2px solid #0000;box-shadow:0 0 0 3px #fff,0 0 0 5px rgba(0,0,0,.6);}
+    h1{font-size:1.4rem;margin:10px 0 8px;font-weight:600;}
+    .price{font-weight:600;margin:0 0 12px;}
+    .meta{margin:8px 0 6px;color:#666;font-size:.95rem;}
+    .rating{display:flex;gap:8px;align-items:center;justify-content:center;margin:0 0 4px;}
+    .stars{display:inline-flex;gap:2px;vertical-align:middle}
+    .stars svg{width:18px;height:18px}
+    .btn{display:block;width:100%;padding:16px 18px;margin:10px 0;border-radius:var(--btn-radius);text-decoration:none;text-align:center;background:var(--bared-black);color:#fff;border:0;letter-spacing:.02em;font-weight:600;transition:transform .06s ease,opacity .15s ease,box-shadow .15s ease;box-shadow:0 1px 0 rgba(0,0,0,.08);}
+    .btn:hover{opacity:.9;} .btn:active{transform:translateY(1px);} .btn:focus-visible{outline:2px solid #0000;box-shadow:0 0 0 3px #fff,0 0 0 5px rgba(0,0,0,.6);}
     .btn-inline{display:inline-block;width:auto;padding:12px 16px;font-size:.9rem;}
     .note{color:#666;font-size:.9rem;margin-top:12px;}
     .err{color:#b00020;margin-top:14px;}
     .actions{display:grid;gap:12px;margin-top:12px}
-
+    /* Review nugget */
+    .nugget{margin:8px auto 2px;text-align:left;background:#fafafa;border:1px solid #eee;padding:14px;border-radius:8px;max-width:600px}
+    .nugget .quote{font-size:1.05rem;line-height:1.45;margin:0 0 8px}
+    .nugget .by{color:#666;font-size:.95rem;display:flex;gap:8px;align-items:center}
     /* Overlays */
     .overlay{position:fixed;inset:0;display:none}
     .overlay.show{display:block}
-    /* Fullscreen lightbox (styling) */
     .lightbox{position:fixed;inset:0;background:#fff;display:flex;flex-direction:column}
-    .lb-header{
-      height:56px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
-      gap:12px;font-weight:500;border-bottom:1px solid #eee;position:relative;
-    }
-    .lb-btn{
-      position:absolute;top:0;bottom:0;width:56px;border:0;background:transparent;font-size:22px;cursor:pointer;
-    }
-    .lb-close{right:0;}
-    .lb-prev{left:0;}
-    .lb-next{right:56px;}
+    .lb-header{height:56px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:12px;font-weight:500;border-bottom:1px solid #eee;position:relative;}
+    .lb-btn{position:absolute;top:0;bottom:0;width:56px;border:0;background:transparent;font-size:22px;cursor:pointer;}
+    .lb-close{right:0;} .lb-prev{left:0;} .lb-next{right:56px;}
     .lb-counter{pointer-events:none;}
     .lb-body{flex:1 1 auto;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;}
-    .lb-img{
-      max-width:100vw; max-height:calc(100vh - 56px);
-      width:auto; height:auto; object-fit:contain; border-radius:0;
-    }
-
-    /* Reviews bottom sheet */
+    .lb-img{max-width:100vw;max-height:calc(100vh - 56px);width:auto;height:auto;object-fit:contain;border-radius:0;}
+    /* Reviews sheet */
     .sheet-wrap{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top-left-radius:12px;border-top-right-radius:12px;box-shadow:0 -10px 30px rgba(0,0,0,.25);max-height:85vh;display:flex;flex-direction:column}
     .sheet-header{height:56px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid #eee;font-weight:600;position:relative}
     .sheet-close{position:absolute;right:6px;top:0;bottom:0;border:0;background:transparent;font-size:22px;cursor:pointer;padding:0 12px}
     .sheet-content{padding:14px;overflow:auto}
-
     .share-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px}
     .share-row a{padding:10px 12px;border-radius:10px;border:1px solid #ddd;text-decoration:none;color:#111}
-
-    /* Prevent scroll when overlay open */
+    .footer-hero{margin:18px auto 8px;max-width:var(--maxw);}
     body.noscroll{height:100vh;overflow:hidden}
   </style>
 </head>
 <body>
-  <!-- Logo header -->
   <header class="site-header">
-    <img src="https://cdn.shopify.com/s/files/1/0322/6841/9208/files/BaredLogo_Black.svg?v=1691460489"
-         alt="Bared Footwear logo" class="logo">
+    <img src="https://cdn.shopify.com/s/files/1/0322/6841/9208/files/BaredLogo_Black.svg?v=1691460489" alt="Bared Footwear logo" class="logo">
   </header>
 
   <div class="wrap">
     <div id="imgwrap" class="placeholder" aria-hidden="true"></div>
     <h1 id="title">Loading…</h1>
+    <div id="price" class="price"></div>
 
     <div class="actions">
       <button id="btn-share"   class="btn">Share Product</button>
+
+      <!-- Rating summary sits above Read Reviews -->
+      <div id="rating-summary" class="meta" hidden>
+        <div class="rating">
+          <span class="stars" id="stars"></span>
+          <span id="reviews-count"></span>
+        </div>
+      </div>
+
       <button id="btn-styling" class="btn" aria-disabled="true">View Styling</button>
       <button id="btn-reviews" class="btn" aria-disabled="true">Read Reviews</button>
+
+      <!-- Review nugget sits under the Read Reviews button -->
+      <div id="nugget" class="nugget" hidden>
+        <p class="quote" id="nugget-quote"></p>
+        <div class="by"><span class="stars" id="nugget-stars"></span> <span id="nugget-by"></span></div>
+      </div>
     </div>
 
     <div id="note" class="note"></div>
     <div id="err" class="err" hidden></div>
   </div>
 
-  <!-- STYLING: fullscreen lightbox -->
+  <!-- Fullscreen styling lightbox -->
   <div id="ovl-styling" class="overlay" role="dialog" aria-modal="true" aria-label="Styling gallery">
     <div class="lightbox" role="document">
       <div class="lb-header">
@@ -105,13 +96,11 @@
         <button class="lb-btn lb-next"  aria-label="Next">›</button>
         <button class="lb-btn lb-close" aria-label="Close">×</button>
       </div>
-      <div class="lb-body">
-        <img id="lb-img" class="lb-img" alt="Styling image">
-      </div>
+      <div class="lb-body"><img id="lb-img" class="lb-img" alt="Styling image"></div>
     </div>
   </div>
 
-  <!-- REVIEWS: bottom sheet -->
+  <!-- Reviews sheet -->
   <div id="ovl-reviews" class="overlay" role="dialog" aria-modal="true" aria-label="Reviews">
     <div class="sheet-wrap" role="document">
       <div class="sheet-header">
@@ -122,6 +111,11 @@
     </div>
   </div>
 
+  <!-- Final on-model image -->
+  <div class="wrap">
+    <img id="footer-hero" class="footer-hero" alt="On model" />
+  </div>
+
 <script>
 (function(){
   const params = new URL(location.href).searchParams;
@@ -130,6 +124,16 @@
 
   const titleEl = document.getElementById('title');
   const imgWrap = document.getElementById('imgwrap');
+  const priceEl = document.getElementById('price');
+  const ratingSummary = document.getElementById('rating-summary');
+  const starsEl = document.getElementById('stars');
+  const reviewsCountEl = document.getElementById('reviews-count');
+  const nuggetEl = document.getElementById('nugget');
+  const nuggetQuoteEl = document.getElementById('nugget-quote');
+  const nuggetByEl = document.getElementById('nugget-by');
+  const nuggetStarsEl = document.getElementById('nugget-stars');
+  const footerHero = document.getElementById('footer-hero');
+
   const note = document.getElementById('note');
   const err = document.getElementById('err');
 
@@ -137,7 +141,7 @@
   const btnStyling = document.getElementById('btn-styling');
   const btnReviews = document.getElementById('btn-reviews');
 
-  // Styling lightbox elements
+  // Styling lightbox
   const ovlStyling = document.getElementById('ovl-styling');
   const lbImg = document.getElementById('lb-img');
   const lbCounter = document.getElementById('lb-counter');
@@ -145,26 +149,22 @@
   const lbNext = ovlStyling.querySelector('.lb-next');
   const lbClose = ovlStyling.querySelector('.lb-close');
 
-  // Reviews elements
+  // Reviews sheet
   const ovlReviews = document.getElementById('ovl-reviews');
   const sheetClose = ovlReviews.querySelector('.sheet-close');
   const reviewsContent = document.getElementById('reviews-content');
 
-  let gallery = []; let index = 0; let product = null;
+  let gallery = []; let index = 0;
 
   if(!handle){
     titleEl.textContent = 'No product specified';
-    err.hidden = false;
-    err.textContent = 'This page expects a ?handle=your-product-handle';
+    err.hidden = false; err.textContent = 'This page expects a ?handle=your-product-handle';
     return;
   }
 
-  // Load product JSON (relative path for GitHub Pages)
-  const localJson = `nfc/data/${handle}.json`;
-  fetch(localJson)
-    .then(r => { if(!r.ok) throw new Error('local-missing'); return r.json(); })
+  fetch(`nfc/data/${handle}.json`)
+    .then(r => { if(!r.ok) throw new Error('missing'); return r.json(); })
     .then(prod => {
-      product = prod;
       renderProduct(prod);
       wireShare(prod);
       wireStyling(prod);
@@ -176,138 +176,147 @@
       imgWrap.innerHTML = '';
       btnStyling.onclick = () => location.href = pdp + '#styling';
       btnReviews.onclick = () => location.href = pdp + '#reviews';
-      btnStyling.removeAttribute('aria-disabled');
-      btnReviews.removeAttribute('aria-disabled');
+      btnStyling.removeAttribute('aria-disabled'); btnReviews.removeAttribute('aria-disabled');
     });
 
-  function renderProduct(p){
-    titleEl.textContent = p.title || handle;
-    if(p.image){ imgWrap.innerHTML = `<img class="hero" src="${p.image}" alt="${p.title||''}">`; }
-    else{ imgWrap.innerHTML = ''; }
-    btnStyling.removeAttribute('aria-disabled');
-    btnReviews.removeAttribute('aria-disabled');
-    if(p.vendor) note.textContent = `By ${p.vendor}`;
-    document.body.dataset.pdp = p.url || (`https://baredfootwear.com/au/products/${handle}`);
-    document.body.dataset.title = p.title || handle;
+  function formatAUD(amount){
+    try{
+      return new Intl.NumberFormat('en-AU', { style:'currency', currency:'AUD', maximumFractionDigits: 0 }).format(amount);
+    }catch{ return `AUD $${amount}`; }
   }
 
-  /* 1) Share */
+  function starSvg(fill = 1) {
+  // Elegant thin-line Bared-style stars
+  const path = "M12 1.5l2.9 5.88 6.5.94-4.7 4.58 1.1 6.42L12 16.9l-5.8 3.05 1.1-6.42-4.7-4.58 6.5-.94L12 1.5z";
+  const color = "#5c534a"; // muted warm grey tone from your PDPs
+  const outline = "#5c534a";
+
+  if (fill === 1) {
+    // full star
+    return `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path d="${path}" fill="${color}" stroke="${outline}" stroke-width="0.5" />
+    </svg>`;
+  } else if (fill === 0.5) {
+    // half star
+    return `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <defs>
+        <linearGradient id="half" x1="0" x2="1">
+          <stop offset="50%" stop-color="${color}" />
+          <stop offset="50%" stop-color="transparent" />
+        </linearGradient>
+      </defs>
+      <path d="${path}" fill="url(#half)" stroke="${outline}" stroke-width="0.5" />
+    </svg>`;
+  } else {
+    // empty star
+    return `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path d="${path}" fill="none" stroke="${outline}" stroke-width="0.5" />
+    </svg>`;
+  }
+}
+  function renderStars(container, rating){
+    const stars = [];
+    for(let i=1;i<=5;i++){
+      const diff = rating - i + 1;
+      stars.push(starSvg(diff>=1?1:diff>=0.5?0.5:0));
+    }
+    container.innerHTML = stars.join('');
+  }
+
+  function renderProduct(p){
+    // Title & price
+    titleEl.textContent = p.title || handle;
+    if(typeof p.price === 'number'){ priceEl.textContent = `${formatAUD(p.price)} ${p.currency||'AUD'}`; }
+
+    // Main image
+    if(p.image){ imgWrap.innerHTML = `<img class="hero" src="${p.image}" alt="${p.title||''}">`; }
+    else{ imgWrap.innerHTML=''; }
+
+    // Reviews summary (above button)
+    const sum = p.reviews && p.reviews.summary;
+    if(sum && typeof sum.count === 'number' && typeof sum.rating === 'number'){
+      renderStars(starsEl, sum.rating);
+      reviewsCountEl.textContent = `(${sum.count} reviews)`;
+      ratingSummary.hidden = false;
+    }
+
+    // Review nugget (below button)
+    const nug = p.reviews && p.reviews.nugget;
+    if(nug && nug.quote){
+      nuggetQuoteEl.textContent = `“${nug.quote}”`;
+      if(nug.author){ nuggetByEl.textContent = nug.author; }
+      renderStars(nuggetStarsEl, (sum && sum.rating) ? sum.rating : 5);
+      nuggetEl.hidden = false;
+    }
+
+    // Footer hero
+    if(p.footerImage){ footerHero.src = p.footerImage; footerHero.alt = (p.title||'') + ' on model'; }
+
+    // Enable buttons
+    btnStyling.removeAttribute('aria-disabled'); btnReviews.removeAttribute('aria-disabled');
+
+    if(p.vendor) note.textContent = `By ${p.vendor}`;
+    document.body.dataset.pdp = p.url || (`https://baredfootwear.com/au/products/${handle}`);
+  }
+
+  /* Share */
   function wireShare(p){
     const shareUrl = location.href;
     const shareData = {title:p.title||'Bared Footwear',text:`${p.title||''} — from Bared Footwear`,url:shareUrl};
     btnShare.onclick = async ()=>{
-      if(navigator.share){
-        try{await navigator.share(shareData);}catch(e){}
-      }else{
-        // simple fallback options
+      if(navigator.share){ try{await navigator.share(shareData);}catch(e){} }
+      else{
         const encoded=encodeURIComponent(shareUrl);
         const subject=encodeURIComponent(p.title||'Bared Footwear');
         const body=encodeURIComponent(`${p.title||''}\n${shareUrl}`);
         const smsHref=`sms:?&body=${body}`;
         const emailHref=`mailto:?subject=${subject}&body=${body}`;
         const waHref=`https://wa.me/?text=${encoded}`;
-        const row=document.createElement('div');
-        row.className='share-row';
-        row.innerHTML=`
-          <a href="${smsHref}">SMS</a>
-          <a href="${emailHref}">Email</a>
-          <a href="${waHref}" target="_blank" rel="noopener">WhatsApp</a>
-          <a href="#" id="copylink">Copy link</a>`;
+        const row=document.createElement('div'); row.className='share-row';
+        row.innerHTML=`<a href="${smsHref}">SMS</a><a href="${emailHref}">Email</a><a href="${waHref}" target="_blank" rel="noopener">WhatsApp</a><a href="#" id="copylink">Copy link</a>`;
         btnShare.insertAdjacentElement('afterend',row);
-        const copy=row.querySelector('#copylink');
-        copy.onclick=async(e)=>{
-          e.preventDefault();
-          try{await navigator.clipboard.writeText(shareUrl);copy.textContent='Copied!';}
-          catch{prompt('Copy this link:',shareUrl);}
-        }
+        row.querySelector('#copylink').onclick=async(e)=>{e.preventDefault();try{await navigator.clipboard.writeText(shareUrl);e.target.textContent='Copied!';}catch{prompt('Copy this link:',shareUrl);} };
       }
     }
   }
 
-  /* 2) Styling: fullscreen lightbox */
+  /* Styling lightbox */
   function wireStyling(p){
-    gallery = Array.isArray(p.styling) && p.styling.length ? p.styling : (p.image ? [p.image] : []);
-    btnStyling.onclick = (e)=>{ e.preventDefault(); openLightbox(0); };
+    const gallery = Array.isArray(p.styling)&&p.styling.length?p.styling:(p.image?[p.image]:[]);
+    let i=0;
+    const open=idx=>{ i=idx; update(); document.body.classList.add('noscroll'); ovlStyling.classList.add('show'); };
+    const close=()=>{ ovlStyling.classList.remove('show'); document.body.classList.remove('noscroll'); };
+    const next =()=>{ i=(i+1)%gallery.length; update(); };
+    const prev =()=>{ i=(i-1+gallery.length)%gallery.length; update(); };
+    const update=()=>{ lbImg.src=gallery[i]; lbCounter.textContent=`${i+1} / ${gallery.length}`; };
 
-    lbPrev.onclick = ()=> changeImage(-1);
-    lbNext.onclick = ()=> changeImage( 1);
-    lbClose.onclick = closeLightbox;
-
-    // tap outside does not close (to avoid accidental closes); Esc closes
-    document.addEventListener('keydown', (ev)=>{
-      if(!ovlStyling.classList.contains('show')) return;
-      if(ev.key==='Escape') closeLightbox();
-      if(ev.key==='ArrowLeft') changeImage(-1);
-      if(ev.key==='ArrowRight') changeImage(1);
-    });
-
-    // basic swipe handling
-    let startX=null;
-    ovlStyling.addEventListener('touchstart',e=>{startX=e.touches[0].clientX;},{passive:true});
-    ovlStyling.addEventListener('touchend',e=>{
-      if(startX==null) return;
-      const dx=e.changedTouches[0].clientX - startX;
-      if(Math.abs(dx)>40) changeImage(dx>0?-1:1);
-      startX=null;
-    });
-  }
-  function openLightbox(i){
-    index = i;
-    updateLightbox();
-    document.body.classList.add('noscroll');
-    ovlStyling.classList.add('show');
-  }
-  function closeLightbox(){
-    ovlStyling.classList.remove('show');
-    document.body.classList.remove('noscroll');
-  }
-  function changeImage(delta){
-    if(!gallery.length) return;
-    index = (index + delta + gallery.length) % gallery.length;
-    updateLightbox();
-  }
-  function updateLightbox(){
-    lbImg.src = gallery[index];
-    lbCounter.textContent = `${index+1} / ${gallery.length}`;
+    btnStyling.onclick=(e)=>{ e.preventDefault(); if(gallery.length){ open(0); } };
+    lbNext.onclick=next; lbPrev.onclick=prev; lbClose.onclick=close;
+    document.addEventListener('keydown',ev=>{ if(!ovlStyling.classList.contains('show'))return; if(ev.key==='Escape')close(); if(ev.key==='ArrowRight')next(); if(ev.key==='ArrowLeft')prev(); });
+    let startX=null; ovlStyling.addEventListener('touchstart',e=>{startX=e.touches[0].clientX;},{passive:true});
+    ovlStyling.addEventListener('touchend',e=>{ if(startX==null)return; const dx=e.changedTouches[0].clientX-startX; if(Math.abs(dx)>40){ dx>0?prev():next(); } startX=null; });
   }
 
-  /* 3) Reviews: sturdier loader + clearer errors */
+  /* Reviews sheet */
   function wireReviews(p){
-    const path = p.reviews && p.reviews.htmlPath;
-    btnReviews.onclick = async (e)=>{
-      e.preventDefault();
-      document.body.classList.add('noscroll');
-      ovlReviews.classList.add('show');
-      const pdp = p.url || (`https://baredfootwear.com/au/products/${handle}`);
-      const suffix = utmParams ? ((pdp.includes('?')?'&':'?')+utmParams) : '';
+    const path=p.reviews&&p.reviews.htmlPath;
+    btnReviews.onclick=async(e)=>{
+      e.preventDefault(); document.body.classList.add('noscroll'); ovlReviews.classList.add('show');
+      const pdp=p.url||(`https://baredfootwear.com/au/products/${handle}`);
+      const suffix=utmParams?((pdp.includes('?')?'&':'?')+utmParams):'';
       const openPdp = `<div style="margin-top:12px"><a class="btn btn-inline" href="${pdp+suffix}#reviews" target="_blank" rel="noopener">View all reviews on product page</a></div>`;
-
-      if(!path){
-        reviewsContent.innerHTML = `<p>Inline reviews not configured for this product.</p>${openPdp}`;
-        return;
-      }
+      if(!path){ reviewsContent.innerHTML=`<p>Inline reviews not configured for this product.</p>${openPdp}`; return; }
       try{
-        const r = await fetch(path, {cache:'no-store'});   // avoid GH Pages caching gotchas
-        if(!r.ok){
-          reviewsContent.innerHTML = `<p>Couldn’t load reviews (HTTP ${r.status}).</p>${openPdp}`;
-          return;
-        }
-        const html = await r.text();
-        // tiny safety: strip <script> tags if any were pasted
-        const sanitized = html.replace(/<script[\s\S]*?<\/script>/gi,'');
-        reviewsContent.innerHTML = sanitized + openPdp;
-      }catch(e){
-        reviewsContent.innerHTML = `<p>Couldn’t load reviews.</p>${openPdp}`;
-      }
+        const r=await fetch(path,{cache:'no-store'});
+        if(!r.ok){ reviewsContent.innerHTML=`<p>Couldn’t load reviews (HTTP ${r.status}).</p>${openPdp}`; return; }
+        const html=await r.text();
+        const sanitized=html.replace(/<script[\s\S]*?<\/script>/gi,'');
+        reviewsContent.innerHTML=sanitized+openPdp;
+      }catch{ reviewsContent.innerHTML=`<p>Couldn’t load reviews.</p>${openPdp}`; }
     };
-    sheetClose.onclick = ()=>{
-      ovlReviews.classList.remove('show');
-      document.body.classList.remove('noscroll');
-    };
-    // click backdrop to close
-    ovlReviews.addEventListener('click',(e)=>{
-      if(e.target===ovlReviews){ sheetClose.click(); }
-    });
+    const sheetClose = ovlReviews.querySelector('.sheet-close');
+    sheetClose.onclick=()=>{ ovlReviews.classList.remove('show'); document.body.classList.remove('noscroll'); };
+    ovlReviews.addEventListener('click',e=>{ if(e.target===ovlReviews){ sheetClose.click(); } });
   }
 })();
 </script>
