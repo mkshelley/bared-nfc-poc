@@ -6,80 +6,77 @@
   <title>Bared NFC POC</title>
   <meta name="robots" content="noindex" />
 
-  <!-- ✅ Brand Font: Montserrat -->
+  <!-- Brand Font -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --pad:20px; --maxw:720px; --radius:14px;
-      --bared-black:#111; --bared-grey:#f6f6f6;
-      --btn-radius:12px;
+      --pad:20px; --maxw:720px; --radius:0;          /* 0 = square corners */
+      --bared-black:#111; --btn-radius:10px;
     }
-
-    body{
-      font-family:'Montserrat', system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      margin:0;
-      background:#fff;
-      color:#111;
-    }
-
-    /* Logo */
+    body{font-family:'Montserrat',system-ui,-apple-system,"Segoe UI",Roboto,Arial;margin:0;background:#fff;color:#111;}
+    /* Header / Logo */
     .site-header{text-align:center;padding:24px 0 8px;}
     .logo{height:32px;width:auto;max-width:180px;opacity:0;animation:fadeIn .6s ease forwards;}
     @keyframes fadeIn{to{opacity:1;}}
-
     /* Layout */
     .wrap{max-width:var(--maxw);margin:0 auto;padding:var(--pad);text-align:center;}
     .hero{width:100%;height:auto;border-radius:var(--radius);display:block;margin:8px 0;}
     .placeholder{min-height:200px;background:#eee;border-radius:var(--radius);}
     h1{font-size:1.4rem;margin:10px 0 14px;font-weight:600;}
-
-    /* Buttons – All black brand style */
+    /* Buttons – all black */
     .btn{
       display:block;width:100%;padding:16px 18px;margin:10px 0;
       border-radius:var(--btn-radius);
-      text-decoration:none;text-align:center;
-      background:var(--bared-black);color:#fff;border:0;
-      letter-spacing:.02em;font-weight:600;font-family:'Montserrat',sans-serif;
+      text-decoration:none;text-align:center;background:var(--bared-black);color:#fff;border:0;
+      letter-spacing:.02em;font-weight:600;
       transition:transform .06s ease,opacity .15s ease,box-shadow .15s ease;
       box-shadow:0 1px 0 rgba(0,0,0,.08);
     }
-    .btn:hover{opacity:.9;}
-    .btn:active{transform:translateY(1px);}
-    .btn:focus-visible{
-      outline:2px solid #0000;
-      box-shadow:0 0 0 3px #fff,0 0 0 5px rgba(0,0,0,.6);
-    }
-    .btn-inline{display:inline-block;width:auto;padding:12px 16px;font-size:0.9rem;}
-
-    /* Text & structure */
+    .btn:hover{opacity:.9;} .btn:active{transform:translateY(1px);}
+    .btn:focus-visible{outline:2px solid #0000;box-shadow:0 0 0 3px #fff,0 0 0 5px rgba(0,0,0,.6);}
+    .btn-inline{display:inline-block;width:auto;padding:12px 16px;font-size:.9rem;}
     .note{color:#666;font-size:.9rem;margin-top:12px;}
     .err{color:#b00020;margin-top:14px;}
     .actions{display:grid;gap:12px;margin-top:12px}
 
-    /* Overlay elements */
-    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none}
-    .overlay.show{display:block;animation:fadeIn .3s ease forwards}
-    .modal,.sheet{position:fixed;left:50%;transform:translateX(-50%);background:#fff;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
-    .modal{top:50%;transform:translate(-50%,-50%);width:min(100% - 32px,900px);max-height:85vh;overflow:auto}
-    .sheet{bottom:0;width:min(100% - 16px,900px);max-height:85vh;overflow:auto;border-bottom-left-radius:0;border-bottom-right-radius:0}
-    .modal header,.sheet header{position:sticky;top:0;background:#fff;border-bottom:1px solid #eee;padding:10px 14px;font-weight:600;display:flex;align-items:center;justify-content:space-between}
-    .close{appearance:none;border:0;background:transparent;font-size:1.6rem;line-height:1;cursor:pointer}
+    /* Overlays */
+    .overlay{position:fixed;inset:0;display:none}
+    .overlay.show{display:block}
+    /* Fullscreen lightbox (styling) */
+    .lightbox{position:fixed;inset:0;background:#fff;display:flex;flex-direction:column}
+    .lb-header{
+      height:56px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+      gap:12px;font-weight:500;border-bottom:1px solid #eee;position:relative;
+    }
+    .lb-btn{
+      position:absolute;top:0;bottom:0;width:56px;border:0;background:transparent;font-size:22px;cursor:pointer;
+    }
+    .lb-close{right:0;}
+    .lb-prev{left:0;}
+    .lb-next{right:56px;}
+    .lb-counter{pointer-events:none;}
+    .lb-body{flex:1 1 auto;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;}
+    .lb-img{
+      max-width:100vw; max-height:calc(100vh - 56px);
+      width:auto; height:auto; object-fit:contain; border-radius:0;
+    }
 
-    /* Carousel */
-    .carousel{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:14px}
-    .carousel img{height:60vh;max-height:560px;width:auto;border-radius:12px;scroll-snap-align:center;flex:0 0 auto}
-    .carousel::-webkit-scrollbar{display:none}
-    @media(max-width:420px){.carousel img{height:55vh}}
+    /* Reviews bottom sheet */
+    .sheet-wrap{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top-left-radius:12px;border-top-right-radius:12px;box-shadow:0 -10px 30px rgba(0,0,0,.25);max-height:85vh;display:flex;flex-direction:column}
+    .sheet-header{height:56px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid #eee;font-weight:600;position:relative}
+    .sheet-close{position:absolute;right:6px;top:0;bottom:0;border:0;background:transparent;font-size:22px;cursor:pointer;padding:0 12px}
+    .sheet-content{padding:14px;overflow:auto}
 
-    /* Fallback share row */
     .share-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px}
     .share-row a{padding:10px 12px;border-radius:10px;border:1px solid #ddd;text-decoration:none;color:#111}
+
+    /* Prevent scroll when overlay open */
+    body.noscroll{height:100vh;overflow:hidden}
   </style>
 </head>
 <body>
-
-  <!-- Header with Logo -->
+  <!-- Logo header -->
   <header class="site-header">
     <img src="https://cdn.shopify.com/s/files/1/0322/6841/9208/files/BaredLogo_Black.svg?v=1691460489"
          alt="Bared Footwear logo" class="logo">
@@ -99,25 +96,29 @@
     <div id="err" class="err" hidden></div>
   </div>
 
-  <!-- Styling modal -->
-  <div id="ovl-styling" class="overlay" role="dialog" aria-modal="true">
-    <div class="modal" role="document">
-      <header>
-        <span>Styling</span>
-        <button class="close" aria-label="Close" data-close="styling">×</button>
-      </header>
-      <div id="carousel" class="carousel" aria-label="Styling images"></div>
+  <!-- STYLING: fullscreen lightbox -->
+  <div id="ovl-styling" class="overlay" role="dialog" aria-modal="true" aria-label="Styling gallery">
+    <div class="lightbox" role="document">
+      <div class="lb-header">
+        <button class="lb-btn lb-prev"  aria-label="Previous">‹</button>
+        <div class="lb-counter" id="lb-counter">1 / 1</div>
+        <button class="lb-btn lb-next"  aria-label="Next">›</button>
+        <button class="lb-btn lb-close" aria-label="Close">×</button>
+      </div>
+      <div class="lb-body">
+        <img id="lb-img" class="lb-img" alt="Styling image">
+      </div>
     </div>
   </div>
 
-  <!-- Reviews sheet -->
-  <div id="ovl-reviews" class="overlay" role="dialog" aria-modal="true">
-    <div class="sheet" role="document">
-      <header>
+  <!-- REVIEWS: bottom sheet -->
+  <div id="ovl-reviews" class="overlay" role="dialog" aria-modal="true" aria-label="Reviews">
+    <div class="sheet-wrap" role="document">
+      <div class="sheet-header">
         <span>Reviews</span>
-        <button class="close" aria-label="Close" data-close="reviews">×</button>
-      </header>
-      <div id="reviews-content" style="padding:14px;text-align:left"></div>
+        <button class="sheet-close" aria-label="Close reviews">×</button>
+      </div>
+      <div id="reviews-content" class="sheet-content"></div>
     </div>
   </div>
 
@@ -136,10 +137,20 @@
   const btnStyling = document.getElementById('btn-styling');
   const btnReviews = document.getElementById('btn-reviews');
 
+  // Styling lightbox elements
   const ovlStyling = document.getElementById('ovl-styling');
+  const lbImg = document.getElementById('lb-img');
+  const lbCounter = document.getElementById('lb-counter');
+  const lbPrev = ovlStyling.querySelector('.lb-prev');
+  const lbNext = ovlStyling.querySelector('.lb-next');
+  const lbClose = ovlStyling.querySelector('.lb-close');
+
+  // Reviews elements
   const ovlReviews = document.getElementById('ovl-reviews');
-  const carousel = document.getElementById('carousel');
+  const sheetClose = ovlReviews.querySelector('.sheet-close');
   const reviewsContent = document.getElementById('reviews-content');
+
+  let gallery = []; let index = 0; let product = null;
 
   if(!handle){
     titleEl.textContent = 'No product specified';
@@ -148,10 +159,12 @@
     return;
   }
 
+  // Load product JSON (relative path for GitHub Pages)
   const localJson = `nfc/data/${handle}.json`;
   fetch(localJson)
     .then(r => { if(!r.ok) throw new Error('local-missing'); return r.json(); })
     .then(prod => {
+      product = prod;
       renderProduct(prod);
       wireShare(prod);
       wireStyling(prod);
@@ -178,7 +191,7 @@
     document.body.dataset.title = p.title || handle;
   }
 
-  // Share
+  /* 1) Share */
   function wireShare(p){
     const shareUrl = location.href;
     const shareData = {title:p.title||'Bared Footwear',text:`${p.title||''} — from Bared Footwear`,url:shareUrl};
@@ -186,6 +199,7 @@
       if(navigator.share){
         try{await navigator.share(shareData);}catch(e){}
       }else{
+        // simple fallback options
         const encoded=encodeURIComponent(shareUrl);
         const subject=encodeURIComponent(p.title||'Bared Footwear');
         const body=encodeURIComponent(`${p.title||''}\n${shareUrl}`);
@@ -210,58 +224,90 @@
     }
   }
 
-  // Styling carousel
+  /* 2) Styling: fullscreen lightbox */
   function wireStyling(p){
-    let imgs=Array.isArray(p.styling)?p.styling:[];
-    if(!imgs.length&&p.image)imgs=[p.image];
-    btnStyling.onclick=(e)=>{
-      e.preventDefault();
-      carousel.innerHTML=imgs.map(src=>`<img src="${src}" alt="Styling image">`).join('');
-      ovlStyling.classList.add('show');
-    };
-    ovlStyling.addEventListener('click',(e)=>{
-      if(e.target===ovlStyling||e.target.dataset.close==='styling')ovlStyling.classList.remove('show');
+    gallery = Array.isArray(p.styling) && p.styling.length ? p.styling : (p.image ? [p.image] : []);
+    btnStyling.onclick = (e)=>{ e.preventDefault(); openLightbox(0); };
+
+    lbPrev.onclick = ()=> changeImage(-1);
+    lbNext.onclick = ()=> changeImage( 1);
+    lbClose.onclick = closeLightbox;
+
+    // tap outside does not close (to avoid accidental closes); Esc closes
+    document.addEventListener('keydown', (ev)=>{
+      if(!ovlStyling.classList.contains('show')) return;
+      if(ev.key==='Escape') closeLightbox();
+      if(ev.key==='ArrowLeft') changeImage(-1);
+      if(ev.key==='ArrowRight') changeImage(1);
+    });
+
+    // basic swipe handling
+    let startX=null;
+    ovlStyling.addEventListener('touchstart',e=>{startX=e.touches[0].clientX;},{passive:true});
+    ovlStyling.addEventListener('touchend',e=>{
+      if(startX==null) return;
+      const dx=e.changedTouches[0].clientX - startX;
+      if(Math.abs(dx)>40) changeImage(dx>0?-1:1);
+      startX=null;
     });
   }
+  function openLightbox(i){
+    index = i;
+    updateLightbox();
+    document.body.classList.add('noscroll');
+    ovlStyling.classList.add('show');
+  }
+  function closeLightbox(){
+    ovlStyling.classList.remove('show');
+    document.body.classList.remove('noscroll');
+  }
+  function changeImage(delta){
+    if(!gallery.length) return;
+    index = (index + delta + gallery.length) % gallery.length;
+    updateLightbox();
+  }
+  function updateLightbox(){
+    lbImg.src = gallery[index];
+    lbCounter.textContent = `${index+1} / ${gallery.length}`;
+  }
 
-  // Reviews sheet
+  /* 3) Reviews: sturdier loader + clearer errors */
   function wireReviews(p){
-    const path=p.reviews&&p.reviews.htmlPath;
-    btnReviews.onclick=async(e)=>{
+    const path = p.reviews && p.reviews.htmlPath;
+    btnReviews.onclick = async (e)=>{
       e.preventDefault();
-      reviewsContent.innerHTML='<p style="margin:14px;color:#666">Loading reviews…</p>';
+      document.body.classList.add('noscroll');
       ovlReviews.classList.add('show');
-      if(path){
-        try{
-          const r=await fetch(path);
-          if(!r.ok)throw new Error('not ok');
-          const html=await r.text();
-          reviewsContent.innerHTML=html+renderReviewsFooter();
-        }catch{
-          reviewsContent.innerHTML=renderReviewsFallback(p.url||(`https://baredfootwear.com/au/products/${handle}`));
+      const pdp = p.url || (`https://baredfootwear.com/au/products/${handle}`);
+      const suffix = utmParams ? ((pdp.includes('?')?'&':'?')+utmParams) : '';
+      const openPdp = `<div style="margin-top:12px"><a class="btn btn-inline" href="${pdp+suffix}#reviews" target="_blank" rel="noopener">View all reviews on product page</a></div>`;
+
+      if(!path){
+        reviewsContent.innerHTML = `<p>Inline reviews not configured for this product.</p>${openPdp}`;
+        return;
+      }
+      try{
+        const r = await fetch(path, {cache:'no-store'});   // avoid GH Pages caching gotchas
+        if(!r.ok){
+          reviewsContent.innerHTML = `<p>Couldn’t load reviews (HTTP ${r.status}).</p>${openPdp}`;
+          return;
         }
-      }else{
-        reviewsContent.innerHTML=renderReviewsFallback(p.url||(`https://baredfootwear.com/au/products/${handle}`));
+        const html = await r.text();
+        // tiny safety: strip <script> tags if any were pasted
+        const sanitized = html.replace(/<script[\s\S]*?<\/script>/gi,'');
+        reviewsContent.innerHTML = sanitized + openPdp;
+      }catch(e){
+        reviewsContent.innerHTML = `<p>Couldn’t load reviews.</p>${openPdp}`;
       }
     };
+    sheetClose.onclick = ()=>{
+      ovlReviews.classList.remove('show');
+      document.body.classList.remove('noscroll');
+    };
+    // click backdrop to close
     ovlReviews.addEventListener('click',(e)=>{
-      if(e.target===ovlReviews||e.target.dataset.close==='reviews')ovlReviews.classList.remove('show');
+      if(e.target===ovlReviews){ sheetClose.click(); }
     });
-  }
-
-  function renderReviewsFooter(){
-    const pdp=document.body.dataset.pdp;
-    const suffix=utmParams?((pdp.includes('?')?'&':'?')+utmParams):'';
-    return `<div style="margin-top:14px">
-      <a href="${pdp+suffix}#reviews" target="_blank" rel="noopener" class="btn btn-inline">View all reviews on product page</a>
-    </div>`;
-  }
-  function renderReviewsFallback(pdp){
-    const suffix=utmParams?((pdp.includes('?')?'&':'?')+utmParams):'';
-    return `<div style="padding:14px">
-      <p style="margin:0 0 10px">We couldn’t load inline reviews here.</p>
-      <a href="${pdp+suffix}#reviews" class="btn btn-inline">Open reviews on product page</a>
-    </div>`;
   }
 })();
 </script>
