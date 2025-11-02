@@ -65,7 +65,7 @@
       // Fallback: minimal rendering based on handle—link to main PDP
       titleEl.textContent = handle.replace(/-/g,' ');
       imgWrap.innerHTML = '';
-      const pdp = `https://www.bared.com.au/products/${handle}`;
+      const pdp = `https://baredfootwear.com/au/products/${handle}`;
       const suffix = utmParams ? ((pdp.includes('?') ? '&' : '?') + utmParams) : '';
       btnStyling.href = pdp + suffix + '#styling';
       btnReviews.href = pdp + suffix + '#reviews';
@@ -80,7 +80,7 @@
     } else {
       imgWrap.innerHTML = '';
     }
-    const pdp = p.url || (`https://www.bared.com.au/products/${handle}`);
+    const pdp = p.url || (`https://www.baredfootwear.com/au/products/${handle}`);
     const suffix = utmParams ? ((pdp.includes('?') ? '&' : '?') + utmParams) : '';
     btnStyling.href = pdp + suffix + '#styling';
     btnReviews.href = pdp + suffix + '#reviews';
