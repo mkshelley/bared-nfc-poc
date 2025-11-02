@@ -405,25 +405,46 @@
   }
 
   /* Share */
-  function wireShare(p){
-    const shareUrl = location.href;
-    const shareData = {title:p.title||'Bared Footwear',text:`${p.title||''} — from Bared Footwear`,url:shareUrl};
-    btnShare.onclick = async ()=>{
-      if(navigator.share){ try{await navigator.share(shareData);}catch(e){} }
-      else{
-        const encoded=encodeURIComponent(shareUrl);
-        const subject=encodeURIComponent(p.title||'Bared Footwear');
-        const body=encodeURIComponent(`${p.title||''}\n${shareUrl}`);
-        const smsHref=`sms:?&body=${body}`;
-        const emailHref=`mailto:?subject=${subject}&body=${body}`;
-        const waHref=`https://wa.me/?text=${encoded}`;
-        const row=document.createElement('div'); row.className='share-row';
-        row.innerHTML=`<a href="${smsHref}">SMS</a><a href="${emailHref}">Email</a><a href="${waHref}" target="_blank" rel="noopener">WhatsApp</a><a href="#" id="copylink">Copy link</a>`;
-        btnShare.insertAdjacentElement('afterend',row);
-        row.querySelector('#copylink').onclick=async(e)=>{e.preventDefault();try{await navigator.clipboard.writeText(shareUrl);e.target.textContent='Copied!';}catch{prompt('Copy this link:',shareUrl);} };
-      }
+
+function wireShare(p){
+  // Always share the actual live PDP link instead of GitHub
+  const liveUrl = p.url || `https://baredfootwear.com/au/products/${handle}`;
+  const shareData = {
+    title: p.title || 'Bared Footwear',
+    text: `${p.title || ''} — from Bared Footwear`,
+    url: liveUrl
+  };
+
+  btnShare.onclick = async ()=>{
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch(e) {}
+    } else {
+      // fallback share options
+      const encoded = encodeURIComponent(liveUrl);
+      const subject = encodeURIComponent(p.title || 'Bared Footwear');
+      const body = encodeURIComponent(`${p.title || ''}\n${liveUrl}`);
+      const smsHref = `sms:?&body=${body}`;
+      const emailHref = `mailto:?subject=${subject}&body=${body}`;
+      const waHref = `https://wa.me/?text=${encoded}`;
+
+      const row = document.createElement('div');
+      row.className = 'share-row';
+      row.innerHTML = `
+        <a href="${smsHref}">SMS</a>
+        <a href="${emailHref}">Email</a>
+        <a href="${waHref}" target="_blank" rel="noopener">WhatsApp</a>
+        <a href="${liveUrl}" target="_blank" rel="noopener">Open Product Page</a>
+      `;
+      btnShare.insertAdjacentElement('afterend', row);
     }
-  }
+  };
+}
+
+
+
+  
 
   /* Styling: fullscreen lightbox with chevrons */
   function wireStyling(p){
