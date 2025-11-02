@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bared NFC POC</title>
+  <meta name="robots" content="noindex" />
+  <style>
+    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial; margin:0; padding:20px; background:#fff; color:#111; text-align:center;}
+    .wrap{max-width:720px;margin:0 auto;}
+    .hero{width:100%;height:auto;border-radius:12px;display:block;margin:8px 0;}
+    .placeholder{min-height:200px;background:#eee;border-radius:12px;}
+    h1{font-size:1.3rem;margin:6px 0 12px;}
+    .btn{display:block;padding:14px;border-radius:10px;margin:8px 0;text-decoration:none;border:1px solid #ddd;}
+    .primary{background:#111;color:#fff;border:0;}
+    .secondary{background:#f7f7f7;color:#111;}
+    .note{color:#666;font-size:.9rem;margin-top:12px;}
+    .err{color:#b00020;margin-top:14px;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="imgwrap" class="placeholder" aria-hidden="true"></div>
+    <h1 id="title">Loading…</h1>
+
+    <a id="btn-styling" class="btn primary" href="#" aria-disabled="true">View Styling</a>
+    <a id="btn-reviews" class="btn secondary" href="#" aria-disabled="true">Read Reviews</a>
+
+    <div id="note" class="note"></div>
+    <div id="err" class="err" hidden></div>
+  </div>
+
+<script>
+(function(){
+  function qs(name){ const u=new URL(location.href); return u.searchParams.get(name); }
+  const handle = qs('handle');
+  const utmParams = (new URL(location.href)).searchParams.toString();
+  const titleEl = document.getElementById('title');
+  const imgWrap = document.getElementById('imgwrap');
+  const btnStyling = document.getElementById('btn-styling');
+  const btnReviews = document.getElementById('btn-reviews');
+  const note = document.getElementById('note');
+  const err = document.getElementById('err');
+
+  if(!handle){
+    titleEl.textContent = 'No product specified';
+    err.hidden = false;
+    err.textContent = 'This page expects a ?handle=your-product-handle';
+    btnStyling.href = 'https://www.bared.com.au/collections/all';
+    btnReviews.href = 'https://www.bared.com.au/collections/all';
+    return;
+  }
+
+  // Try local JSON: /nfc/data/<handle>.json
+  const localJson = `/nfc/data/${handle}.json`;
+  fetch(localJson)
+    .then(r => {
+      if(!r.ok) throw new Error('local-missing');
+      return r.json();
+    })
+    .then(prod => {
+      renderProduct(prod);
+    })
+    .catch(() => {
+      // Fallback: minimal rendering based on handle—link to main PDP
+      titleEl.textContent = handle.replace(/-/g,' ');
+      imgWrap.innerHTML = '';
+      const pdp = `https://www.bared.com.au/products/${handle}`;
+      const suffix = utmParams ? ((pdp.includes('?') ? '&' : '?') + utmParams) : '';
+      btnStyling.href = pdp + suffix + '#styling';
+      btnReviews.href = pdp + suffix + '#reviews';
+      btnStyling.removeAttribute('aria-disabled'); btnReviews.removeAttribute('aria-disabled');
+      note.textContent = 'Full product data not hosted here. Redirect will go to main site.';
+    });
+
+  function renderProduct(p){
+    titleEl.textContent = p.title || handle;
+    if(p.image){
+      imgWrap.innerHTML = `<img class="hero" src="${p.image}" alt="${p.title||''}">`;
+    } else {
+      imgWrap.innerHTML = '';
+    }
+    const pdp = p.url || (`https://www.bared.com.au/products/${handle}`);
+    const suffix = utmParams ? ((pdp.includes('?') ? '&' : '?') + utmParams) : '';
+    btnStyling.href = pdp + suffix + '#styling';
+    btnReviews.href = pdp + suffix + '#reviews';
+    btnStyling.removeAttribute('aria-disabled'); btnReviews.removeAttribute('aria-disabled');
+    if(p.vendor) note.textContent = `By ${p.vendor}`;
+  }
+})();
+</script>
+</body>
+</html>
