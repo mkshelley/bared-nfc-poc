@@ -79,11 +79,107 @@
     }
 
     /* Reviews bottom sheet */
-    .sheet-wrap{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top-left-radius:12px;border-top-right-radius:12px;box-shadow:0 -10px 30px rgba(0,0,0,.25);max-height:85vh;display:flex;flex-direction:column}
+.sheet-wrap{
+  position:fixed;inset:0;
+  background:#fff;
+  border-radius:0;
+  box-shadow:none;
+  display:flex;flex-direction:column;
+  height:100vh;
+}
+
+    
     .sheet-header{height:56px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid #eee;font-weight:600;position:relative}
     .sheet-close{position:absolute;right:6px;top:0;bottom:0;border:0;background:transparent;font-size:22px;cursor:pointer;padding:0 12px}
     .sheet-content{padding:14px;overflow:auto}
 
+/* --- Full-screen review layout --- */
+.sheet-header {
+  height:60px;
+  border-bottom:1px solid #eee;
+  font-size:1.1rem;
+  font-weight:600;
+  letter-spacing:0.02em;
+}
+
+.sheet-content {
+  padding:24px 20px 40px;
+  overflow-y:auto;
+  line-height:1.6;
+}
+
+/* Individual review styling */
+.reviews-section {
+  max-width:680px;
+  margin:0 auto;
+}
+
+.review {
+  padding:20px 0;
+  border-bottom:1px solid #eee;
+}
+
+.review:last-child {
+  border-bottom:none;
+}
+
+.review-author {
+  font-size:1.05rem;
+  font-weight:600;
+  color:#3c3c3b;
+}
+
+.review-meta {
+  font-size:.85rem;
+  color:#6f6f6f;
+  margin-top:2px;
+  margin-bottom:6px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.review-stars {
+  font-size:1rem;
+  color:#5c534a;
+  margin-bottom:4px;
+}
+
+.review-date {
+  font-size:.8rem;
+  color:#999;
+  margin-bottom:6px;
+}
+
+.review-title {
+  font-size:.95rem;
+  font-weight:600;
+  text-transform:uppercase;
+  margin:4px 0 8px;
+}
+
+.review-body {
+  font-size:.95rem;
+  color:#333;
+  margin:0;
+}
+
+/* Better close button */
+.sheet-close {
+  position:absolute;
+  right:16px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:24px;
+  background:none;
+  border:0;
+  cursor:pointer;
+  color:#5c534a;
+}
+
+
+
+    
     /* Share fallback row */
     .share-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px}
     .share-row a{padding:10px 12px;border-radius:10px;border:1px solid #ddd;text-decoration:none;color:#111}
